@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&display=swap");
+
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'Inter', sans-serif;
+}
+body {
+  font-family: var(--font-body);
+  background-color: #ffffff;
+  color: #6E6E73;
+  overflow-x: hidden;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: #1A1A1A;
+}
+/* Holographic Animations */
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes heroGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.holographic-text {
+  background: linear-gradient(90deg, #b8a9ff, #a8d8ff, #a8ffda, #ffe8a8, #ffb8d8, #b8a9ff);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s ease infinite;
+}
+.holographic-border {
+  position: relative;
+  border: 1px solid rgba(0,0,0,0.08);
+  transition: border-color 0.3s ease;
+}
+.holographic-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #b8a9ff, #a8d8ff, #a8ffda, #ffe8a8, #ffb8d8);
+  background-size: 300% 300%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  animation: shimmer 3s ease infinite;
+  pointer-events: none;
+}
+.holographic-border:hover::before {
+  opacity: 1;
+}
+.hero-bg {
+  background: linear-gradient(135deg, #ffffff 0%, #f0eeff 25%, #eef6ff 50%, #efffef 75%, #ffffff 100%);
+  background-size: 400% 400%;
+  animation: heroGradient 8s ease infinite;
+}
+.holographic-btn {
+  background: linear-gradient(135deg, #b8a9ff, #a8d8ff, #a8ffda, #ffe8a8, #ffb8d8);
+  background-size: 300% 300%;
+  animation: shimmer 3s ease infinite;
+  color: #1A1A1A;
+  font-weight: 500;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.holographic-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(168, 216, 255, 0.3);
+}
