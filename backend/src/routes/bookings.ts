@@ -3,7 +3,7 @@ import {
   getBookings,
   getBookingById,
   createBooking,
-  updateBookingStatus,
+  updateBookingStatusHandler,
 } from '../controllers/bookingsController';
 
 const router = Router();
@@ -18,6 +18,6 @@ router.get('/:id', getBookingById);
 router.post('/', createBooking);
 
 // PATCH  /api/bookings/:id/status — update booking status
-router.patch('/:id/status', updateBookingStatus);
+router.patch('/:id/status', updateBookingStatusHandler);
 
 export default router;
