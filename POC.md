@@ -10,7 +10,6 @@ The objective of this Proof of Concept is to build a baseline version of a hotel
 * **Frontend:** React + Vite (for fast build and development), Tailwind CSS (for UI styling).
 * **Backend:** Python (FastAPI or similar framework recommended for building the REST API).
 * **Database & Auth:** Supabase (PostgreSQL for data storage and built-in authentication service).
-* **Hosting/Deployment (Optional for POC):** Vercel (Frontend), Render/Railway (Backend).
 
 ## 3. Scope Boundaries
 
