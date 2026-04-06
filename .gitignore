@@ -1,1 +1,67 @@
-node_modules
+# ──────────────────────────────────────────
+# Frontend
+# ──────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/.env.production
+
+# Vite cache
+frontend/.vite/
+
+# TypeScript build info
+frontend/tsconfig.tsbuildinfo
+
+# ──────────────────────────────────────────
+# Backend
+# ──────────────────────────────────────────
+backend/.venv/
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# Python bytecode
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+
+# Distribution / packaging
+backend/dist/
+backend/build/
+backend/*.egg-info/
+backend/.eggs/
+
+# Pytest / coverage
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/coverage.xml
+
+# mypy / pyright
+backend/.mypy_cache/
+backend/.pyright/
+
+# ──────────────────────────────────────────
+# Logs
+# ──────────────────────────────────────────
+*.log
+logs/
+
+# ──────────────────────────────────────────
+# IDE / Editor
+# ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ──────────────────────────────────────────
+# OS
+# ──────────────────────────────────────────
+.DS_Store
+.DS_Store?
+Thumbs.db
+Desktop.ini
