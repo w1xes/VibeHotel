@@ -56,47 +56,8 @@ erDiagram
 
 ---
 
-## 2. Authorization Code Flow
 
-```mermaid
-sequenceDiagram
-    actor User
-    participant Frontend as React Frontend
-    participant SupabaseAuth as Supabase Auth
-    participant Backend as FastAPI Backend
-    participant JWKS as Supabase JWKS
-    participant DB as PostgreSQL
-
-    User->>Frontend: Enter email + password
-    Frontend->>SupabaseAuth: signInWithPassword(email, password)
-    SupabaseAuth-->>SupabaseAuth: Validate credentials
-    alt Invalid credentials
-        SupabaseAuth-->>Frontend: Error (401)
-        Frontend-->>User: Show error message
-    else Valid credentials
-        SupabaseAuth-->>Frontend: JWT Access Token + Refresh Token
-        Frontend->>Frontend: Store token in authStore
-
-        User->>Frontend: Access protected resource
-        Frontend->>Backend: Request with Authorization: Bearer <JWT>
-        Backend->>JWKS: GET /auth/v1/.well-known/jwks.json
-        JWKS-->>Backend: RSA public keys
-        Backend->>Backend: Verify JWT signature (RS256/ES256)
-        alt Invalid / expired token
-            Backend-->>Frontend: 401 Unauthorized
-            Frontend-->>User: Redirect to login
-        else Token valid
-            Backend->>DB: SELECT * FROM profiles WHERE id = sub
-            DB-->>Backend: Profile (id, name, role)
-            Backend-->>Frontend: Protected resource (200 OK)
-            Frontend-->>User: Display response data
-        end
-    end
-```
-
----
-
-## 3. Activity Diagram — Booking Flow
+## 2. Activity Diagram — Booking Flow
 
 ```mermaid
 flowchart TD
