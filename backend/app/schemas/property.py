@@ -12,6 +12,7 @@ class PropertyImageOut(BaseModel):
 
 class PropertyOut(BaseModel):
     id: UUID
+    slug: str
     title: str
     type: str
     description: str
@@ -36,6 +37,7 @@ class PropertyOut(BaseModel):
 
 class PropertyCreate(BaseModel):
     title: str
+    slug: str | None = None  # auto-generated from title when omitted
     type: str
     description: str = ""
     price: float
@@ -56,6 +58,7 @@ class PropertyCreate(BaseModel):
 
 class PropertyUpdate(BaseModel):
     title: str | None = None
+    slug: str | None = None
     type: str | None = None
     description: str | None = None
     price: float | None = None

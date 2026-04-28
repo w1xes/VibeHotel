@@ -23,6 +23,7 @@ class Property(Base):
     area: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     amenities: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     featured: Mapped[bool] = mapped_column(Boolean, default=False)
+    slug: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

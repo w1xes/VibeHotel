@@ -7,15 +7,21 @@ const typeLabel = { house: 'House', suite: 'Suite', room: 'Room' };
 export default function PropertyCard({ property }) {
   return (
     <Link
-      to={`/properties/${property.id}`}
+      to={`/properties/${property.slug}`}
       className="group block overflow-hidden rounded-2xl border border-border bg-white transition-shadow hover:shadow-lg"
     >
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={property.images[0]}
-          alt={property.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-        />
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+        {property.images[0] ? (
+          <img
+            src={property.images[0]}
+            alt={property.title}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-text-muted text-sm">
+            No photo
+          </div>
+        )}
         <Badge className="absolute top-3 left-3" color="accent">
           {typeLabel[property.type] || property.type}
         </Badge>

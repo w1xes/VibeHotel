@@ -1,3 +1,4 @@
+import re
 from typing import Annotated
 from uuid import UUID
 
@@ -14,12 +15,21 @@ from app.schemas.property import PropertyCreate, PropertyOut, PropertyUpdate
 router = APIRouter(prefix="/properties", tags=["properties"])
 
 
+def _slugify(text: str) -> str:
+    """Convert a title to a URL-safe slug, e.g. 'Lakeside Cottage' → 'lakeside-cottage'."""
+    slug = text.lower()
+    slug = re.sub(r"[^\w\s-]", "", slug)
+    slug = re.sub(r"[\s_]+", "-", slug)
+    slug = re.sub(r"-+", "-", slug)
+    return slug.strip("-")
+
+
 @router.get("", response_model=list[PropertyOut])
 async def list_properties(
     db: Annotated[AsyncSession, Depends(get_db)],
     type: str | None = Query(None),
-    min_capacity: int | None = Query(None, alias="minCapacity"),
-    max_price: float | None = Query(None, alias="maxPrice"),
+    min_capacity: int | None = Query(None),
+    max_price: float | None = Query(None),
     search: str | None = Query(None),
     featured: bool | None = Query(None),
 ):
@@ -44,16 +54,25 @@ async def list_properties(
     return result.scalars().unique().all()
 
 
-@router.get("/{property_id}", response_model=PropertyOut)
+@router.get("/{property_ref}", response_model=PropertyOut)
 async def get_property(
-    property_id: UUID,
+    property_ref: str,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    stmt = (
-        select(Property)
-        .options(selectinload(Property.images))
-        .where(Property.id == property_id)
-    )
+    """Accept either a UUID or a slug."""
+    try:
+        property_id = UUID(property_ref)
+        stmt = (
+            select(Property)
+            .options(selectinload(Property.images))
+            .where(Property.id == property_id)
+        )
+    except ValueError:
+        stmt = (
+            select(Property)
+            .options(selectinload(Property.images))
+            .where(Property.slug == property_ref)
+        )
     result = await db.execute(stmt)
     prop = result.scalar_one_or_none()
     if not prop:
@@ -67,7 +86,10 @@ async def create_property(
     db: Annotated[AsyncSession, Depends(get_db)],
     _admin: Annotated[dict, Depends(require_admin)],
 ):
-    prop = Property(**data.model_dump())
+    payload = data.model_dump()
+    if not payload.get("slug"):
+        payload["slug"] = _slugify(payload["title"])
+    prop = Property(**payload)
     db.add(prop)
     await db.commit()
     await db.refresh(prop, ["images"])

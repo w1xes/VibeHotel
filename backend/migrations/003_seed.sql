@@ -4,7 +4,7 @@
 -- then run: UPDATE profiles SET role = 'admin' WHERE id = '<admin-user-uuid>';
 
 -- Seed properties
-INSERT INTO properties (id, title, type, description, price, capacity, bedrooms, bathrooms, area, amenities, featured)
+INSERT INTO properties (id, title, type, description, price, capacity, bedrooms, bathrooms, area, amenities, featured, slug)
 VALUES
   (
     'a1111111-1111-1111-1111-111111111111',
@@ -13,7 +13,8 @@ VALUES
     'A charming two-story cottage overlooking the lake, surrounded by mature pine trees. Features a private dock, stone fireplace, and a wrap-around porch perfect for morning coffee.',
     220, 6, 3, 2, 140,
     ARRAY['Wi-Fi', 'Kitchen', 'Fireplace', 'Private dock', 'BBQ', 'Parking', 'Lake view'],
-    TRUE
+    TRUE,
+    'lakeside-cottage'
   ),
   (
     'a2222222-2222-2222-2222-222222222222',
@@ -22,7 +23,8 @@ VALUES
     'An elegant suite on the upper floor with panoramic mountain views. Modern furnishings paired with natural wood accents create a serene retreat after a day of hiking.',
     150, 2, 1, 1, 55,
     ARRAY['Wi-Fi', 'Mini bar', 'Balcony', 'Mountain view', 'Room service', 'Air conditioning'],
-    TRUE
+    TRUE,
+    'mountain-view-suite'
   ),
   (
     'a3333333-3333-3333-3333-333333333333',
@@ -31,7 +33,8 @@ VALUES
     'A cozy wooden cabin nestled deep in the forest. Fall asleep to the sound of a nearby stream and wake up to birdsong. Ideal for couples seeking a digital detox.',
     130, 2, 1, 1, 45,
     ARRAY['Fireplace', 'Terrace', 'Forest view', 'Parking', 'BBQ'],
-    FALSE
+    FALSE,
+    'forest-cabin'
   ),
   (
     'a4444444-4444-4444-4444-444444444444',
@@ -40,7 +43,8 @@ VALUES
     'A spacious family house with a large private garden and playground. Three bright bedrooms, a fully equipped kitchen, and a dining room that seats eight comfortably.',
     280, 8, 4, 2, 200,
     ARRAY['Wi-Fi', 'Kitchen', 'Garden', 'Playground', 'Parking', 'Washing machine', 'BBQ', 'Air conditioning'],
-    TRUE
+    TRUE,
+    'garden-family-house'
   ),
   (
     'a5555555-5555-5555-5555-555555555555',
@@ -49,7 +53,8 @@ VALUES
     'A well-appointed standard room in the main lodge. Simple yet comfortable, with quality linens, a writing desk, and views of the courtyard garden.',
     85, 2, 1, 1, 28,
     ARRAY['Wi-Fi', 'Air conditioning', 'Room service', 'Garden view'],
-    FALSE
+    FALSE,
+    'comfort-room'
   ),
   (
     'a6666666-6666-6666-6666-666666666666',
@@ -58,7 +63,8 @@ VALUES
     'A luxurious villa perched on the riverbank with floor-to-ceiling windows. Features a private hot tub on the terrace, a gourmet kitchen, and direct river access for kayaking.',
     350, 6, 3, 3, 180,
     ARRAY['Wi-Fi', 'Kitchen', 'Hot tub', 'Terrace', 'River view', 'Kayaks', 'Parking', 'Air conditioning'],
-    FALSE
+    FALSE,
+    'riverside-villa'
   ),
   (
     'a7777777-7777-7777-7777-777777777777',
@@ -67,7 +73,8 @@ VALUES
     'A modern loft apartment above the main lodge with double-height ceilings and a mezzanine bedroom. The open-plan living area opens onto a wide balcony with 180° views.',
     190, 3, 1, 1, 70,
     ARRAY['Wi-Fi', 'Kitchenette', 'Balcony', 'Mountain view', 'Air conditioning', 'Smart TV'],
-    FALSE
+    FALSE,
+    'panoramic-loft'
   );
 
 -- Seed property images

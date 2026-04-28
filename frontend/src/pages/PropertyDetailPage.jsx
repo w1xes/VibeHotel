@@ -13,14 +13,14 @@ import Spinner from '../components/ui/Spinner';
 const typeLabel = { house: 'House', suite: 'Suite', room: 'Room' };
 
 export default function PropertyDetailPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const setDraft = useBookingStore((s) => s.setDraft);
 
   const { data: property, isLoading, error } = useQuery({
-    queryKey: ['property', id],
-    queryFn: () => getProperty(id),
+    queryKey: ['property', slug],
+    queryFn: () => getProperty(slug),
   });
 
   const handleBookNow = () => {

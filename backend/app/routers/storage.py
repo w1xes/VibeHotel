@@ -1,4 +1,3 @@
-import uuid as uuid_mod
 from typing import Annotated
 from uuid import UUID
 
@@ -50,9 +49,11 @@ async def upload_image(
     if len(content) > 5 * 1024 * 1024:
         raise HTTPException(status_code=400, detail="File too large (max 5MB)")
 
-    # Generate unique filename
-    ext = file.filename.rsplit(".", 1)[-1] if "." in file.filename else "jpg"
-    filename = f"properties/{property_id}/{uuid_mod.uuid4()}.{ext}"
+    # Generate filename: properties/{property_id}/{position:02d}.{ext}
+    # If a file at that position already exists it will be overwritten, which
+    # is the desired behaviour for a replace-in-place admin upload.
+    ext = (file.filename.rsplit(".", 1)[-1] if "." in file.filename else "jpg").lower()
+    filename = f"properties/{property_id}/{position:02d}.{ext}"
 
     # Upload to Supabase Storage
     sb = _get_supabase()

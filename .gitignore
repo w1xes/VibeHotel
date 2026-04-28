@@ -19,6 +19,12 @@ dist-ssr
 # Allow example files
 !.env.example
 
+# Python cache
+*__pycache__
+*.py[cod]
+*.pyo
+.pytest_cache/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -29,3 +35,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+*.png

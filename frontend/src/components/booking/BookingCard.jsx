@@ -16,7 +16,7 @@ export default function BookingCard({ booking, onCancel }) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 rounded-2xl border border-border bg-white p-4">
       {property && (
-        <Link to={`/properties/${property.id}`} className="shrink-0">
+        <Link to={`/properties/${property.slug ?? property.id}`} className="shrink-0">
           <img
             src={property.images[0]}
             alt={property.title}

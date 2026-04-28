@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS properties (
   area NUMERIC(10,2),
   amenities TEXT[] NOT NULL DEFAULT '{}',
   featured BOOLEAN NOT NULL DEFAULT FALSE,
+  slug TEXT NOT NULL UNIQUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
