@@ -9,7 +9,9 @@ async function getAuthHeaders() {
 }
 
 async function request(path, options = {}) {
-  const authHeaders = await getAuthHeaders();
+  const authHeaders = options.headers?.Authorization
+    ? {}
+    : await getAuthHeaders();
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
@@ -29,6 +31,8 @@ async function request(path, options = {}) {
 
 export const api = {
   get: (path) => request(path),
+  getWithToken: (path, token) =>
+    request(path, { headers: { Authorization: `Bearer ${token}` } }),
   post: (path, data) =>
     request(path, {
       method: 'POST',

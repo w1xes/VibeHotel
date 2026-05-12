@@ -13,7 +13,7 @@ export const useAuthStore = create((set) => ({
       return;
     }
     try {
-      const profile = await api.get('/users/me');
+      const profile = await api.getWithToken('/users/me', session.access_token);
       set({ user: profile, session, loading: false });
     } catch {
       set({ user: null, session, loading: false });

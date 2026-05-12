@@ -47,9 +47,9 @@ export default function PropertyDetailPage() {
     if (checkIn) params.set('checkIn', checkIn);
     if (checkOut) params.set('checkOut', checkOut);
     if (guests) params.set('guests', String(guests));
-    const bookPath = `/book/${property.id}${params.toString() ? `?${params.toString()}` : ''}`;
+    const bookPath = `/book/${property.slug}${params.toString() ? `?${params.toString()}` : ''}`;
     if (!user) {
-      navigate('/login', { state: { from: { pathname: `/book/${property.id}`, search: params.toString() ? `?${params.toString()}` : '' } } });
+      navigate('/login', { state: { from: { pathname: `/book/${property.slug}`, search: params.toString() ? `?${params.toString()}` : '' } } });
     } else {
       navigate(bookPath);
     }

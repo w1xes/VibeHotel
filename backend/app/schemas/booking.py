@@ -37,6 +37,7 @@ class BookingOut(BaseModel):
     total_price: float
     status: str
     created_at: str
+    user_name: str | None = None
     property: PropertyOut | None = None
 
     model_config = {"from_attributes": True}

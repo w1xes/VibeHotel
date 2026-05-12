@@ -38,6 +38,7 @@ def _verify_token(token: str) -> dict:
             signing_key.key,
             algorithms=["RS256", "ES256"],
             audience="authenticated",
+            leeway=30,
         )
         return payload
     except pyjwt.exceptions.PyJWTError as e:

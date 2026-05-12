@@ -11,7 +11,9 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from
+    ? (location.state.from.pathname || '/') + (location.state.from.search || '')
+    : '/';
 
   const handleLogin = async (data) => {
     setError('');

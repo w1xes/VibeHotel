@@ -5,6 +5,7 @@ function transformBooking(b) {
     id: b.id,
     propertyId: b.property_id,
     userId: b.user_id,
+    userName: b.user_name ?? null,
     checkIn: b.check_in,
     checkOut: b.check_out,
     guests: b.guests,

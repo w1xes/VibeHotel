@@ -24,7 +24,7 @@ export const router = createBrowserRouter([
       { path: '/login', element: <AuthPage /> },
       { path: '/about', element: <AboutPage /> },
       {
-        path: '/book/:id',
+        path: '/book/:slug',
         element: (
           <ProtectedRoute>
             <BookingPage />

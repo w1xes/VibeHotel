@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.deps import get_current_user, require_admin
 from app.models.booking import Booking
+from app.models.profile import Profile
 from app.models.property import Property
 from app.schemas.booking import BookingCreate, BookingOut, BookingStatusUpdate
 
@@ -113,7 +114,23 @@ async def get_all_bookings(
         .order_by(Booking.created_at.desc())
     )
     result = await db.execute(stmt)
-    return result.scalars().unique().all()
+    bookings = result.scalars().unique().all()
+
+    # Fetch user names in a single query
+    user_ids = list({b.user_id for b in bookings})
+    profile_map: dict = {}
+    if user_ids:
+        profile_result = await db.execute(
+            select(Profile.id, Profile.name).where(Profile.id.in_(user_ids))
+        )
+        profile_map = {row.id: row.name for row in profile_result}
+
+    out = []
+    for b in bookings:
+        item = BookingOut.model_validate(b)
+        item.user_name = profile_map.get(b.user_id)
+        out.append(item)
+    return out
 
 
 @router.patch("/{booking_id}/status", response_model=BookingOut)

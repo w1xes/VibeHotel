@@ -11,7 +11,7 @@ import Input from '../components/ui/Input';
 import Spinner from '../components/ui/Spinner';
 
 export default function BookingPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const user = useAuthStore((s) => s.user);
@@ -22,8 +22,8 @@ export default function BookingPage() {
   const [success, setSuccess] = useState(false);
 
   const { data: property, isLoading } = useQuery({
-    queryKey: ['property', id],
-    queryFn: () => getProperty(id),
+    queryKey: ['property', slug],
+    queryFn: () => getProperty(slug),
   });
 
   const mutation = useMutation({
@@ -35,7 +35,7 @@ export default function BookingPage() {
     e.preventDefault();
     if (!checkIn || !checkOut) return;
     mutation.mutate({
-      propertyId: id,
+      propertyId: property.id,
       checkIn,
       checkOut,
       guests: Number(guests),
