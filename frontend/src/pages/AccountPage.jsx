@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { User, Calendar, Clock, XCircle } from 'lucide-react';
+import { User, Calendar, Clock, XCircle, Star } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { getUserBookings, cancelBooking } from '../services/bookingService';
+import { getMyReviews, submitReview, updateReview, deleteReview } from '../services/reviewService';
 import BookingCard from '../components/booking/BookingCard';
+import ReviewForm from '../components/booking/ReviewForm';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import Spinner from '../components/ui/Spinner';
@@ -19,6 +21,8 @@ export default function AccountPage() {
   const user = useAuthStore((s) => s.user);
   const [activeTab, setActiveTab] = useState('upcoming');
   const [cancelTarget, setCancelTarget] = useState(null);
+  const [reviewTarget, setReviewTarget] = useState(null); // { booking, existingReview }
+  const [deleteReviewTarget, setDeleteReviewTarget] = useState(null); // review object
   const queryClient = useQueryClient();
 
   const { data: bookings, isLoading } = useQuery({
@@ -26,11 +30,54 @@ export default function AccountPage() {
     queryFn: () => getUserBookings(),
   });
 
+  const { data: myReviews } = useQuery({
+    queryKey: ['reviews', 'my'],
+    queryFn: getMyReviews,
+    enabled: !!user,
+  });
+
+  // Map bookingId → review for quick lookup
+  const reviewsByBookingId = useMemo(
+    () => Object.fromEntries((myReviews ?? []).map((r) => [r.bookingId, r])),
+    [myReviews],
+  );
+
   const cancelMutation = useMutation({
     mutationFn: cancelBooking,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings', 'me'] });
       setCancelTarget(null);
+    },
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: (scores) => {
+      if (reviewTarget?.existingReview) {
+        return updateReview(reviewTarget.existingReview.id, scores);
+      }
+      return submitReview({ bookingId: reviewTarget.booking.id, ...scores });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'my'] });
+      // Also invalidate the property's review list so PropertyDetailPage updates
+      const propertyId = reviewTarget?.booking?.propertyId;
+      if (propertyId) {
+        queryClient.invalidateQueries({ queryKey: ['reviews', 'property', propertyId] });
+      }
+      setReviewTarget(null);
+    },
+  });
+
+  const deleteReviewMutation = useMutation({
+    mutationFn: (reviewId) => deleteReview(reviewId),
+    onSuccess: (_, reviewId) => {
+      queryClient.invalidateQueries({ queryKey: ['reviews', 'my'] });
+      // Find the property for cache invalidation
+      const review = Object.values(reviewsByBookingId).find((r) => r.id === reviewId);
+      if (review) {
+        queryClient.invalidateQueries({ queryKey: ['reviews', 'property', review.propertyId] });
+      }
+      setDeleteReviewTarget(null);
     },
   });
 
@@ -87,11 +134,48 @@ export default function AccountPage() {
       ) : (
         <div className="space-y-4">
           {filtered?.map((b) => (
-            <BookingCard
-              key={b.id}
-              booking={b}
-              onCancel={(id) => setCancelTarget(id)}
-            />
+            <div key={b.id} className="space-y-2">
+              <BookingCard
+                booking={b}
+                onCancel={b.status === 'confirmed' ? (id) => setCancelTarget(id) : undefined}
+              />
+              {/* Review actions for completed bookings */}
+              {b.status === 'completed' && (
+                <div className="px-1">
+                  {reviewsByBookingId[b.id] ? (
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="text-xs text-text-muted flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                        Your rating: {reviewsByBookingId[b.id].avgScore.toFixed(1)}
+                      </span>
+                      <button
+                        onClick={() =>
+                          setReviewTarget({ booking: b, existingReview: reviewsByBookingId[b.id] })
+                        }
+                        className="text-xs text-primary underline underline-offset-2 hover:no-underline transition-all"
+                      >
+                        Edit review
+                      </button>
+                      <button
+                        onClick={() => setDeleteReviewTarget(reviewsByBookingId[b.id])}
+                        className="text-xs text-error underline underline-offset-2 hover:no-underline transition-all"
+                      >
+                        Delete review
+                      </button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setReviewTarget({ booking: b, existingReview: null })}
+                    >
+                      <Star className="h-3.5 w-3.5" />
+                      Leave a Review
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}
@@ -116,6 +200,40 @@ export default function AccountPage() {
             onClick={() => cancelMutation.mutate(cancelTarget)}
           >
             {cancelMutation.isPending ? 'Cancelling…' : 'Yes, Cancel'}
+          </Button>
+        </div>
+      </Modal>
+
+      {/* Review form modal */}
+      <ReviewForm
+        key={reviewTarget ? (reviewTarget.existingReview?.id ?? 'new') : 'closed'}
+        isOpen={!!reviewTarget}
+        onClose={() => setReviewTarget(null)}
+        onSubmit={(scores) => reviewMutation.mutate(scores)}
+        isLoading={reviewMutation.isPending}
+        existingReview={reviewTarget?.existingReview ?? null}
+      />
+
+      {/* Delete review confirmation modal */}
+      <Modal
+        isOpen={!!deleteReviewTarget}
+        onClose={() => setDeleteReviewTarget(null)}
+        title="Delete Review"
+      >
+        <p className="text-sm text-text-muted mb-6">
+          Are you sure you want to delete your review? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-3">
+          <Button variant="secondary" size="sm" onClick={() => setDeleteReviewTarget(null)}>
+            Keep Review
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            disabled={deleteReviewMutation.isPending}
+            onClick={() => deleteReviewMutation.mutate(deleteReviewTarget.id)}
+          >
+            {deleteReviewMutation.isPending ? 'Deleting…' : 'Yes, Delete'}
           </Button>
         </div>
       </Modal>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Users, BedDouble, Bath } from 'lucide-react';
+import { Users, BedDouble, Bath, Star } from 'lucide-react';
 import Badge from '../ui/Badge';
 
 const typeLabel = { house: 'House', suite: 'Suite', room: 'Room' };
@@ -45,10 +45,21 @@ export default function PropertyCard({ property }) {
           </span>
         </div>
         <p className="text-sm text-text-muted line-clamp-2">{property.description}</p>
-        <p className="text-lg font-semibold text-primary">
-          ${property.price}
-          <span className="text-sm font-normal text-text-muted"> / night</span>
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-lg font-semibold text-primary">
+            ${property.price}
+            <span className="text-sm font-normal text-text-muted"> / night</span>
+          </p>
+          {property.reviewCount > 0 ? (
+            <div className="flex items-center gap-1 text-sm shrink-0">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+              <span className="font-medium">{property.avgRating?.toFixed(1)}</span>
+              <span className="text-text-muted">({property.reviewCount})</span>
+            </div>
+          ) : (
+            <p className="text-xs text-text-muted shrink-0">No reviews yet</p>
+          )}
+        </div>
       </div>
     </Link>
   );

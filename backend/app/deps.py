@@ -61,13 +61,16 @@ async def get_current_user(
             detail="Token missing subject",
         )
 
-    # Fetch profile from DB to get role
+    # Fetch profile from DB; auto-create if missing (e.g. after a DB reset
+    # where auth.users still exist but the profiles table was wiped).
     profile = await db.get(Profile, UUID(user_id))
     if not profile:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User profile not found",
-        )
+        user_meta = payload.get("user_metadata") or {}
+        name = user_meta.get("name") or payload.get("email", "").split("@")[0] or ""
+        profile = Profile(id=UUID(user_id), name=name)
+        db.add(profile)
+        await db.commit()
+        await db.refresh(profile)
 
     return {
         "id": str(profile.id),

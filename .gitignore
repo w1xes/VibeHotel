@@ -37,3 +37,9 @@ dist-ssr
 *.sw?
 
 *.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.svg

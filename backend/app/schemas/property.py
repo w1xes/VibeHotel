@@ -24,6 +24,8 @@ class PropertyOut(BaseModel):
     amenities: list[str] = []
     featured: bool = False
     images: list[PropertyImageOut] = []
+    avg_rating: float | None = None
+    review_count: int = 0
 
     model_config = {"from_attributes": True}
 

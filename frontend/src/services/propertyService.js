@@ -6,6 +6,8 @@ function transformProperty(p) {
     ...p,
     imageObjects: sorted,
     images: sorted.map((img) => img.url),
+    avgRating: p.avg_rating ?? null,
+    reviewCount: p.review_count ?? 0,
   };
 }
 

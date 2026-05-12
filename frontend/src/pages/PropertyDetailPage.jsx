@@ -2,10 +2,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Users, BedDouble, Bath, Maximize2, ArrowLeft } from 'lucide-react';
 import { getProperty } from '../services/propertyService';
+import { getPropertyReviews } from '../services/reviewService';
 import { useAuthStore } from '../store/authStore';
 import { useBookingStore } from '../store/bookingStore';
 import PropertyGallery from '../components/property/PropertyGallery';
 import AmenitiesGrid from '../components/property/AmenitiesGrid';
+import RatingBreakdown from '../components/property/RatingBreakdown';
+import ReviewCard from '../components/property/ReviewCard';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Spinner from '../components/ui/Spinner';
@@ -21,6 +24,12 @@ export default function PropertyDetailPage() {
   const { data: property, isLoading, error } = useQuery({
     queryKey: ['property', slug],
     queryFn: () => getProperty(slug),
+  });
+
+  const { data: reviewData } = useQuery({
+    queryKey: ['reviews', 'property', property?.id],
+    queryFn: () => getPropertyReviews(property.id),
+    enabled: !!property?.id,
   });
 
   const handleBookNow = () => {
@@ -98,6 +107,23 @@ export default function PropertyDetailPage() {
           <div>
             <h2 className="text-xl font-semibold mb-3">Amenities</h2>
             <AmenitiesGrid amenities={property.amenities} />
+          </div>
+
+          {/* Reviews */}
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Guest Reviews</h2>
+            {reviewData?.summary?.reviewCount > 0 ? (
+              <div className="space-y-4">
+                <RatingBreakdown summary={reviewData.summary} />
+                {reviewData.reviews.map((review) => (
+                  <ReviewCard key={review.id} review={review} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-text-muted text-sm">
+                No reviews yet. Be the first to share your experience!
+              </p>
+            )}
           </div>
         </div>
 

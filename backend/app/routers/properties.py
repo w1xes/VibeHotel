@@ -3,13 +3,14 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.deps import require_admin
 from app.models.property import Property, PropertyImage
+from app.models.review import Review
 from app.schemas.property import PropertyCreate, PropertyOut, PropertyUpdate
 
 router = APIRouter(prefix="/properties", tags=["properties"])
@@ -22,6 +23,42 @@ def _slugify(text: str) -> str:
     slug = re.sub(r"[\s_]+", "-", slug)
     slug = re.sub(r"-+", "-", slug)
     return slug.strip("-")
+
+
+async def _attach_ratings(db: AsyncSession, props: list) -> None:
+    """Attach avg_rating and review_count to each property in-place."""
+    if not props:
+        return
+    prop_ids = [p.id for p in props]
+    stmt = (
+        select(
+            Review.property_id,
+            func.count(Review.id).label("review_count"),
+            func.avg(Review.comfort).label("avg_comfort"),
+            func.avg(Review.cleanliness).label("avg_cleanliness"),
+            func.avg(Review.location).label("avg_location"),
+            func.avg(Review.price).label("avg_price"),
+        )
+        .where(Review.property_id.in_(prop_ids))
+        .group_by(Review.property_id)
+    )
+    result = await db.execute(stmt)
+    rating_map: dict = {}
+    for row in result:
+        avg = (
+            float(row.avg_comfort)
+            + float(row.avg_cleanliness)
+            + float(row.avg_location)
+            + float(row.avg_price)
+        ) / 4
+        rating_map[row.property_id] = {
+            "avg_rating": round(avg, 1),
+            "review_count": row.review_count,
+        }
+    for p in props:
+        r = rating_map.get(p.id)
+        p.avg_rating = r["avg_rating"] if r else None
+        p.review_count = r["review_count"] if r else 0
 
 
 @router.get("", response_model=list[PropertyOut])
@@ -51,7 +88,9 @@ async def list_properties(
 
     stmt = stmt.order_by(Property.created_at.desc())
     result = await db.execute(stmt)
-    return result.scalars().unique().all()
+    props = result.scalars().unique().all()
+    await _attach_ratings(db, list(props))
+    return props
 
 
 @router.get("/{property_ref}", response_model=PropertyOut)
@@ -77,6 +116,7 @@ async def get_property(
     prop = result.scalar_one_or_none()
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
+    await _attach_ratings(db, [prop])
     return prop
 
 
@@ -93,6 +133,7 @@ async def create_property(
     db.add(prop)
     await db.commit()
     await db.refresh(prop, ["images"])
+    await _attach_ratings(db, [prop])
     return prop
 
 
@@ -113,6 +154,7 @@ async def update_property(
 
     await db.commit()
     await db.refresh(prop, ["images"])
+    await _attach_ratings(db, [prop])
     return prop
 
 
