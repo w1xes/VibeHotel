@@ -10,6 +10,7 @@ import Spinner from '../components/ui/Spinner';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const today = new Date().toISOString().split('T')[0];
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState('');
@@ -58,13 +59,19 @@ export default function LandingPage() {
             <input
               type="date"
               value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
+              min={today}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCheckIn(val);
+                if (checkOut && checkOut <= val) setCheckOut('');
+              }}
               placeholder="Check-in"
               className="flex-1 rounded-xl bg-white/90 px-4 py-3 text-sm text-text placeholder:text-text-muted/60 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <input
               type="date"
               value={checkOut}
+              min={checkIn ? (() => { const d = new Date(checkIn); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })() : today}
               onChange={(e) => setCheckOut(e.target.value)}
               placeholder="Check-out"
               className="flex-1 rounded-xl bg-white/90 px-4 py-3 text-sm text-text placeholder:text-text-muted/60 focus:outline-none focus:ring-2 focus:ring-primary/30"

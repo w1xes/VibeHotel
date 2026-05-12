@@ -1,4 +1,5 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Users, BedDouble, Bath, Maximize2, ArrowLeft } from 'lucide-react';
 import { getProperty } from '../services/propertyService';
@@ -11,6 +12,7 @@ import RatingBreakdown from '../components/property/RatingBreakdown';
 import ReviewCard from '../components/property/ReviewCard';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import Input from '../components/ui/Input';
 import Spinner from '../components/ui/Spinner';
 
 const typeLabel = { house: 'House', suite: 'Suite', room: 'Room' };
@@ -18,8 +20,15 @@ const typeLabel = { house: 'House', suite: 'Suite', room: 'Room' };
 export default function PropertyDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const [urlParams] = useSearchParams();
   const user = useAuthStore((s) => s.user);
   const setDraft = useBookingStore((s) => s.setDraft);
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const [checkIn, setCheckIn] = useState(urlParams.get('checkIn') || '');
+  const [checkOut, setCheckOut] = useState(urlParams.get('checkOut') || '');
+  const [guests, setGuests] = useState(Number(urlParams.get('guests')) || 1);
 
   const { data: property, isLoading, error } = useQuery({
     queryKey: ['property', slug],
@@ -34,10 +43,15 @@ export default function PropertyDetailPage() {
 
   const handleBookNow = () => {
     setDraft({ propertyId: property.id });
+    const params = new URLSearchParams();
+    if (checkIn) params.set('checkIn', checkIn);
+    if (checkOut) params.set('checkOut', checkOut);
+    if (guests) params.set('guests', String(guests));
+    const bookPath = `/book/${property.id}${params.toString() ? `?${params.toString()}` : ''}`;
     if (!user) {
-      navigate('/login', { state: { from: { pathname: `/book/${property.id}` } } });
+      navigate('/login', { state: { from: { pathname: `/book/${property.id}`, search: params.toString() ? `?${params.toString()}` : '' } } });
     } else {
-      navigate(`/book/${property.id}`);
+      navigate(bookPath);
     }
   };
 
@@ -134,6 +148,32 @@ export default function PropertyDetailPage() {
               <span className="text-3xl font-bold text-primary">${property.price}</span>
               <span className="text-text-muted"> / night</span>
             </div>
+            <Input
+              label="Check-in"
+              type="date"
+              min={today}
+              value={checkIn}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCheckIn(val);
+                if (checkOut && checkOut <= val) setCheckOut('');
+              }}
+            />
+            <Input
+              label="Check-out"
+              type="date"
+              min={checkIn ? (() => { const d = new Date(checkIn); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })() : today}
+              value={checkOut}
+              onChange={(e) => setCheckOut(e.target.value)}
+            />
+            <Input
+              label="Guests"
+              type="number"
+              min={1}
+              max={property.capacity}
+              value={guests}
+              onChange={(e) => setGuests(Number(e.target.value))}
+            />
             <Button onClick={handleBookNow} className="w-full" size="lg">
               Book Now
             </Button>

@@ -4,10 +4,18 @@ import Badge from '../ui/Badge';
 
 const typeLabel = { house: 'House', suite: 'Suite', room: 'Room' };
 
-export default function PropertyCard({ property }) {
+export default function PropertyCard({ property, checkIn = '', checkOut = '', guests = '' }) {
+  const query = new URLSearchParams();
+  if (checkIn) query.set('checkIn', checkIn);
+  if (checkOut) query.set('checkOut', checkOut);
+  if (guests) query.set('guests', String(guests));
+  const to = query.toString()
+    ? `/properties/${property.slug}?${query.toString()}`
+    : `/properties/${property.slug}`;
+
   return (
     <Link
-      to={`/properties/${property.slug}`}
+      to={to}
       className="group block overflow-hidden rounded-2xl border border-border bg-white transition-shadow hover:shadow-lg"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">

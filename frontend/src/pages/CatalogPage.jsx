@@ -39,6 +39,9 @@ export default function CatalogPage() {
   const [maxPrice, setMaxPrice] = useState('');
   const [search, setSearch] = useState('');
 
+  const checkIn = searchParams.get('checkIn') || '';
+  const checkOut = searchParams.get('checkOut') || '';
+
   const filters = useMemo(
     () => ({
       type: type || undefined,
@@ -140,7 +143,7 @@ export default function CatalogPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
               {properties?.map((p) => (
-                <PropertyCard key={p.id} property={p} />
+                <PropertyCard key={p.id} property={p} checkIn={checkIn} checkOut={checkOut} guests={capacity} />
               ))}
             </div>
           )}

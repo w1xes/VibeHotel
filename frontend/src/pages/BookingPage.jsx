@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { CheckCircle } from 'lucide-react';
 import { getProperty } from '../services/propertyService';
@@ -13,11 +13,12 @@ import Spinner from '../components/ui/Spinner';
 export default function BookingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((s) => s.user);
 
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
-  const [guests, setGuests] = useState(1);
+  const [checkIn, setCheckIn] = useState(searchParams.get('checkIn') || '');
+  const [checkOut, setCheckOut] = useState(searchParams.get('checkOut') || '');
+  const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 1);
   const [success, setSuccess] = useState(false);
 
   const { data: property, isLoading } = useQuery({
@@ -90,13 +91,17 @@ export default function BookingPage() {
               type="date"
               min={today}
               value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCheckIn(val);
+                if (checkOut && checkOut <= val) setCheckOut('');
+              }}
               required
             />
             <Input
               label="Check-out Date"
               type="date"
-              min={checkIn || today}
+              min={checkIn ? (() => { const d = new Date(checkIn); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0]; })() : today}
               value={checkOut}
               onChange={(e) => setCheckOut(e.target.value)}
               required
