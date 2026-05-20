@@ -20,6 +20,7 @@ VibeHotel uses **Supabase PostgreSQL** as its database, accessed via the Transac
 
 ## Schema
 ![alt text](supabase-schema-fbhyfkoomysriaarfosj.png)
+
 Migration files are located in `backend/migrations/`. Run them in order inside the Supabase **SQL Editor**.
 
 ### Table: `profiles`

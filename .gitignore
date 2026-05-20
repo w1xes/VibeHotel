@@ -36,7 +36,7 @@ dist-ssr
 *.sln
 *.sw?
 
-*.png
+data/.png
 *.jpg
 *.jpeg
 *.gif
